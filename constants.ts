@@ -35,7 +35,15 @@ Provide your response in the following structured Markdown format:
 * **Decoupling:** (e.g., "Move this synchronous process to an async Queue (Kafka/SQS).")
 * **Compute:** (e.g., "Use Local LLMs for dev/prototyping, Cloud for production reliability.")
 
-### 4. The Verdict
+### 4. 📐 Recommended Architecture
+*Provide a Mermaid.js diagram code block representing the IMPROVED architecture. Use the 'graph TD' or 'flowchart TD' syntax. Ensure the graph is simple but clearly shows the new components (e.g., Redis, Load Balancer).*
+\`\`\`mermaid
+graph TD
+    Client --> LB[Load Balancer]
+    ...
+\`\`\`
+
+### 5. The Verdict
 * **Stability Score:** [0-100]/100
 * **One-Line Summary:** [A punchy, memorable conclusion].
 **--- END SYSTEM PROMPT ---**`;
@@ -61,6 +69,24 @@ I see a monolithic React frontend application connecting directly to a single Po
 * **Caching:** Implement a KV Cache (Redis) for read-heavy endpoints (e.g., fetching user profiles) to reduce DB load by 90%.
 * **Security:** Place the Database in a Private Subnet (VPC). Use a Bastion host or VPN for administrative access.
 
-### 4. The Verdict
+### 4. 📐 Recommended Architecture
+
+\`\`\`mermaid
+graph TD
+    User[User Client] -->|HTTPS| CDN[CDN / Edge]
+    CDN -->|Request| LB[Load Balancer]
+    LB -->|Round Robin| API[API Cluster (Node.js)]
+    API -->|Read Hot Data| Redis[Redis Cache]
+    API -->|Write/Read Miss| DB[(PostgreSQL)]
+    
+    style User fill:#fff,stroke:#333,stroke-width:2px,color:#000
+    style CDN fill:#d4edda,stroke:#155724,stroke-width:2px,color:#155724
+    style LB fill:#fff3cd,stroke:#856404,stroke-width:2px,color:#856404
+    style API fill:#cce5ff,stroke:#004085,stroke-width:2px,color:#004085
+    style Redis fill:#f8d7da,stroke:#721c24,stroke-width:2px,color:#721c24
+    style DB fill:#e2e3e5,stroke:#383d41,stroke-width:2px,color:#383d41
+\`\`\`
+
+### 5. The Verdict
 * **Stability Score:** 15/100
 * **One-Line Summary:** A ticking time bomb—architecturally fragile and insecure by design.`;

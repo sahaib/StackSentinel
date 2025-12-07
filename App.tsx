@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { DropZone } from './components/DropZone';
 import { LoadingState } from './components/LoadingState';
 import { AnalysisResultView } from './components/AnalysisResult';
-import { analyzeArchitecture } from './services/geminiService';
+import { analyzeArchitecture, refineArchitecture } from './services/geminiService';
 import { AnalysisStatus } from './types';
 
 const FeatureCard = ({ icon, title, desc }: { icon: string; title: string; desc: string }) => (
@@ -19,6 +19,7 @@ const App: React.FC = () => {
   const [status, setStatus] = useState<AnalysisStatus>(AnalysisStatus.IDLE);
   const [resultMarkdown, setResultMarkdown] = useState<string>('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isRefining, setIsRefining] = useState(false);
 
   const handleFileSelect = async (file: File) => {
     setSelectedFile(file);
@@ -34,10 +35,25 @@ const App: React.FC = () => {
     }
   };
 
+  const handleRefine = async (feedback: string) => {
+    if (!selectedFile) return;
+    setIsRefining(true);
+    try {
+      // We pass the current markdown so the model knows the context, plus the image.
+      const result = await refineArchitecture(selectedFile, resultMarkdown, feedback);
+      setResultMarkdown(result.markdown);
+    } catch (error) {
+      console.error("Refinement error:", error);
+    } finally {
+      setIsRefining(false);
+    }
+  };
+
   const reset = () => {
     setStatus(AnalysisStatus.IDLE);
     setResultMarkdown('');
     setSelectedFile(null);
+    setIsRefining(false);
   };
 
   return (
@@ -139,7 +155,11 @@ const App: React.FC = () => {
 
             {status === AnalysisStatus.COMPLETE && (
               <div className="flex flex-col items-center w-full">
-                <AnalysisResultView markdown={resultMarkdown} />
+                <AnalysisResultView 
+                  markdown={resultMarkdown} 
+                  onRefine={handleRefine}
+                  isRefining={isRefining}
+                />
                 <button 
                   onClick={reset}
                   className="mt-12 group relative px-8 py-3 rounded-full bg-[#0B0E14] text-slate-300 font-medium border border-slate-700 overflow-hidden transition-all hover:border-cyber-primary/50 hover:text-white"
@@ -180,9 +200,9 @@ const App: React.FC = () => {
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center text-xs text-slate-600 font-mono">
           <p>© 2025 STACKSENTINEL LABS. ALL RIGHTS RESERVED.</p>
           <div className="flex items-center space-x-6 mt-4 md:mt-0">
-            <span className="hover:text-cyber-primary cursor-pointer transition-colors">PRIVACY_PROTOCOL</span>
-            <span className="hover:text-cyber-primary cursor-pointer transition-colors">SYSTEM_STATUS</span>
-            <span className="hover:text-cyber-primary cursor-pointer transition-colors">API_DOCS</span>
+            <a href="https://www.linkedin.com/in/sahaibsingh/" target="_blank" rel="noopener noreferrer" className="hover:text-cyber-primary cursor-pointer transition-colors">LINKEDIN</a>
+            <a href="https://github.com/sahaib" target="_blank" rel="noopener noreferrer" className="hover:text-cyber-primary cursor-pointer transition-colors">GITHUB</a>
+            <a href="https://work.sahaibsingh.com/" target="_blank" rel="noopener noreferrer" className="hover:text-cyber-primary cursor-pointer transition-colors">PORTFOLIO</a>
           </div>
         </div>
       </footer>
