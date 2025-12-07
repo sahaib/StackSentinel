@@ -1,0 +1,5 @@
+{
+  "name": "Copy of StackSentinel",
+  "description": "A futuristic architectural analysis tool powered by Gemini that reviews system diagrams for single points of failure and scalability risks.",
+  "requestFramePermissions": []
+}
